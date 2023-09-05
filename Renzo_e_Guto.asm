@@ -1,15 +1,17 @@
 .data
-
+	char: .byte 
 	menu: .asciiz "Bem vindo. Escolha o modo de jogo:\n1. modo padrao\n2. escolher palavra.\n3. Sair\n"
 	palavra1: .asciiz "teste"
 	palavra2: .asciiz "voce"
 	palavra3: .asciiz "ganhou"
-	char: .byte
-	saiu: .asciiz "Usuario saiu.\n"
-	acertou_string: .asciiz "Voce acertou a palavra!\n"
+	fim: .asciiz "Fim de jogo.\n"
+	acertou_string: .asciiz "Voce acertou a palavra!"
+	proxima_string: .asciiz " Proxima:\n"
+	vidas: .asciiz "\nvidas: "
+	barra_n: .asciiz "\n"
+	perdeu_string: .asciiz "Voce perdeu.\n"
 	current_word: .ascii
 	
-
 .text
 	li $t1, 1
 	li $t2, 2
@@ -27,16 +29,26 @@
 	
 padrao:	la $a3, palavra1 # carregando argumento
 	jal padrao_f
+	
+	li $v0, 4 # escreve o "Proxima:"
+	la $a0, proxima_string
+	syscall
 	la $a3, palavra2
 	jal padrao_f
+	
+	li $v0, 4
+	la $a0, proxima_string
+	syscall
 	la $a3, palavra3
 	jal padrao_f
+	j end
 
 padrao_f:
 	move $t0, $a3 # endereco fica no t0
 	li $t2, 0 # teste pra ver se acertou
 	li $t4, 45 # ascii de -
 	la $t5, current_word
+	li $t8, 3 # t8 = vidas
 	
 	lb $t3, 0($t0) 	#criando current_word com tamanho da palavra (-----), nao sei oq aconteceria com palavra vazia
 loop1:	sb $t4, 0($t5) 
@@ -47,6 +59,14 @@ loop1:	sb $t4, 0($t5)
 
 print:	li $v0, 4 # print string
 	la $a0, current_word
+	syscall
+	la $a0, vidas
+	syscall
+	la $v0, 1
+	move $a0, $t8
+	syscall
+	li $v0, 4
+	la $a0, barra_n
 	syscall
 
 	li $v0, 8 # ler char + new line + \0
@@ -66,7 +86,7 @@ loop2:	lb $t3, 0($t0)  # carrega char atual da palavra certa
 	bne $t3, $t6, wrong # se caracter nao eh igual a lido
 	# se eh igual a lido:
 	sb $t6, 0($t5) # escreve caracter certo na current word
-	addi $t2, $t2, 1 # mostra que acertou pra nao contar erro (erro ainda nao implementado)
+	addi $t2, $t2, 1 # mostra que acertou pra nao contar erro
 	
 wrong:	addi $t5, $t5, 1 # iterador
 	addi $t0, $t0, 1  # iterador
@@ -76,17 +96,26 @@ check:	lb $t1, 0($t7)
 	beq $t1, $zero, acertou
 	addi $t7, $t7, 1 # itera
 	bne $t1, $t4, check # ve se tem algum -
+	bne $t2, $zero, skip  # se nao errou 
+	addi $t8, $t8, -1 # diminui vidas
+	beq $t8, $zero, perdeu  # se vidas == 0
+skip:	move $t2, $zero
 	j print
 	
 acertou:li $v0, 4 # print string
 	la $a0, acertou_string
-	syscall	
+	syscall
+	jr $ra
 
 
 modo2:	
 
 ganhou:
 
-end:	la $a0, saiu
-	li $v0, 4 # print string
+perdeu:	li $v0, 4
+	la $a0, perdeu_string	
+	syscall
+
+end:	li $v0, 4 # print string
+	la $a0, fim
 	syscall
