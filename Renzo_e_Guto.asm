@@ -1,15 +1,18 @@
 .data
 	char: .byte 
-	menu: .asciiz "Bem vindo. Escolha o modo de jogo:\n1. modo padrao\n2. escolher palavra.\n3. Sair\n"
-	palavra1: .asciiz "teste"
-	palavra2: .asciiz "voce"
-	palavra3: .asciiz "ganhou"
+	menu: .asciiz "Bem vindo. Escolha o modo de jogo:\n1. modo padrao\n2. escolher palavra\n3. Sair\n"
+	palavra1: .asciiz "pizzaria"
+	palavra2: .asciiz "assembly"
+	palavra3: .asciiz "compilador"
 	fim: .asciiz "Fim de jogo.\n"
 	acertou_string: .asciiz "Voce acertou a palavra!"
 	proxima_string: .asciiz " Proxima:\n"
 	vidas: .asciiz "\nvidas: "
 	barra_n: .asciiz "\n"
 	perdeu_string: .asciiz "Voce perdeu.\n"
+	digite_string: .asciiz "Digite a palavra.\n"
+	custom_string: .asciiz
+	empty: .space 20
 	current_word: .ascii
 	
 .text
@@ -48,16 +51,21 @@ padrao_f:
 	li $t2, 0 # teste pra ver se acertou
 	li $t4, 45 # ascii de -
 	la $t5, current_word
-	li $t8, 3 # t8 = vidas
+	li $t8, 7 # t8 = vidas
+	li $t9, 10 # new line in ascii
 	
 	lb $t3, 0($t0) 	#criando current_word com tamanho da palavra (-----), nao sei oq aconteceria com palavra vazia
 loop1:	sb $t4, 0($t5) 
 	addi $t0, $t0, 1
 	addi $t5, $t5, 1
-	lb $t3, 0($t0)  
+	lb $t3, 0($t0)
+	beq $t3, $t9, nline
 	bne $t3, $zero, loop1 
 
-print:	li $v0, 4 # print string
+nline:	sb $zero, 0($t0) # remove new line if exists
+	
+print:	
+	li $v0, 4 # print string
 	la $a0, current_word
 	syscall
 	la $a0, vidas
@@ -75,7 +83,6 @@ print:	li $v0, 4 # print string
 	syscall
 
 	lb $t6, char  # t6 = caracter lido
-	#subi $t6, $t6, 2560   # tirando valor do enter do char
 	
 	move $t0, $a3  # t0 = endereco da palavra certa
 	la $t5, current_word # t5 = iterador da current word
@@ -108,13 +115,22 @@ acertou:li $v0, 4 # print string
 	jr $ra
 
 
-modo2:	
-
-ganhou:
+modo2:	li $v0, 4 # print string
+	la $a0, digite_string
+	syscall
+	li $v0, 8 # read string
+	la $a0, custom_string
+	li $a1, 20
+	syscall
+	la $a3, custom_string
+	jal padrao_f
+	j end
 
 perdeu:	li $v0, 4
 	la $a0, perdeu_string	
 	syscall
+	move $a3, $v0
+	jal padrao_f
 
 end:	li $v0, 4 # print string
 	la $a0, fim
