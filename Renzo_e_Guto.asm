@@ -1,9 +1,12 @@
 .data
 	char: .byte 
 	menu: .asciiz "Bem vindo. Escolha o modo de jogo:\n1. modo padrao\n2. escolher palavra\n3. Sair\n"
-	palavra1: .asciiz "pizzaria"
-	palavra2: .asciiz "assembly"
-	palavra3: .asciiz "compilador"
+	palavra1: .asciiz "dados"
+	palavra2: .asciiz "pipeline"
+	palavra3: .asciiz "assembly"
+	palavra4: .asciiz "compilador"
+	palavra5: .asciiz "registradores"
+	palavra6: .asciiz "microprocessador"
 	fim: .asciiz "Fim de jogo.\n"
 	acertou_string: .asciiz "Voce acertou a palavra!"
 	proxima_string: .asciiz " Proxima:\n"
@@ -43,6 +46,24 @@ padrao:	la $a3, palavra1 # carregando argumento
 	la $a0, proxima_string
 	syscall
 	la $a3, palavra3
+	jal padrao_f
+	
+	li $v0, 4
+	la $a0, proxima_string
+	syscall
+	la $a3, palavra4
+	jal padrao_f
+	
+	li $v0, 4
+	la $a0, proxima_string
+	syscall
+	la $a3, palavra5
+	jal padrao_f
+	
+	li $v0, 4
+	la $a0, proxima_string
+	syscall
+	la $a3, palavra6
 	jal padrao_f
 	j end
 
