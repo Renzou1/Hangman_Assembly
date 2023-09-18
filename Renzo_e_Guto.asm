@@ -150,8 +150,6 @@ modo2:	li $v0, 4 # print string
 perdeu:	li $v0, 4
 	la $a0, perdeu_string	
 	syscall
-	move $a3, $v0
-	jal padrao_f
 
 end:	li $v0, 4 # print string
 	la $a0, fim
